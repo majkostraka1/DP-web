@@ -12,6 +12,8 @@ export default () => ({
         relOri: [],
     },
 
+    acc: null,
+
 
 
     AccelerometerService: {
@@ -24,9 +26,11 @@ export default () => ({
         init: function(freq = 10) {
             this.frequency = freq;
             this.accelerometer = new Accelerometer({ frequency: this.frequency });
+
             this.accelerometer.addEventListener('error', (event) => {
                 console.error('Chyba akcelerometra:', event.error.name, event.error.message);
             });
+            return this;
         },
 
         turnOn: function(callback) {
@@ -72,7 +76,10 @@ export default () => ({
 
     init() {
         console.log("Komponent inicializovaný");
-        this.AccelerometerService.init(10); // Pripravíme akcelerometer
+        // this.AccelerometerService.init(10); // Pripravíme akcelerometer
+        this.acc = this.AccelerometerService.init(10);
+
+        window.addEventListener("deviceorientation", handleOrientation, true);
     },
 
 
@@ -82,8 +89,9 @@ export default () => ({
         this.sensorData = { acce: [], gyro: [], magnet: [], absOri: [], relOri: [] };
 
         // Spustíme akcelerometer a každých 100 ms ukladáme dáta
-        this.AccelerometerService.turnOn((data) => {
+        this.acc.turnOn((data) => {
             const t = Date.now() - this.startTime;
+            console.log(data);
             this.sensorData.acce.push({ t, x: data.x, y: data.y, z: data.z });
             // Tu môžete dáta posielať na server, alebo zobraziť v UI
             document.getElementById('accelerometer').textContent = `x: ${data.x.toFixed(2)}, y: ${data.y.toFixed(2)}, z: ${data.z.toFixed(2)}`;
@@ -92,7 +100,7 @@ export default () => ({
 
     stopAccelerometer() {
         this.recording = false;
-        this.AccelerometerService.turnOff();
+        this.acc.turnOff();
         console.log("Meranie bolo zastavené.");
 
         // Teraz môžeme dáta odoslať na server
