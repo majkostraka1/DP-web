@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
 class MeasureSensorData extends Component
@@ -15,20 +16,10 @@ class MeasureSensorData extends Component
 
     public function saveSensorData($data)
     {
-        dd($data);
-        // Validácia dát
-        $validated = collect($data)->only(['activity', 'elapsedTime', 'uid', 'sensorData']);
+        $date = now()->format('Y-m-d_H-i-s');
+        $fileName = "sensor_data_{$date}.json";
 
-        // Generovanie názvu súboru (aktuálny dátum + unikátny hash)
-        $timestamp = now()->format('Ymd_His');
-        $hash = uniqid();
-        $filename = "sensor_data/{$timestamp}_{$hash}.json";
-
-        // Uloženie dát vo formáte JSON
-        Storage::disk('local')->put($filename, json_encode($validated->toArray(), JSON_PRETTY_PRINT));
-
-        // Vráť odpoveď, že dáta boli uložené
-        return response()->json(['success' => true, 'file' => $filename]);
+        Storage::disk('local')->put("sensor_data/{$fileName}", json_encode($data, JSON_PRETTY_PRINT));
     }
 
     public function render()

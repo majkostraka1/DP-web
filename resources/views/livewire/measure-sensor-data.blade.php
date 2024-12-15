@@ -11,8 +11,8 @@
                     <option value="walk">Chôdza</option>
                 </select>
             </div>
-            <button class="btn btn-success mr-2" x-on:click="startAccelerometer">Spusti meranie</button>
-            <button class="btn btn-danger" x-on:click="stopAccelerometer" :disabled="!recording">Zastav meranie</button>
+            <button class="btn btn-success mr-2" x-on:click="start">Spusti meranie</button>
+            <button class="btn btn-danger" x-on:click="stop" :disabled="!recording">Zastav meranie</button>
         </div>
 
         <div class="sensor-card">
@@ -32,6 +32,10 @@
             <div id="absoluteOrientation">Nedostupné</div>
         </div>
         <div class="sensor-card">
+            <h4>Relatívna orientácia:</h4>
+            <div id="relativeOrientation">Nedostupné</div>
+        </div>
+        <div class="sensor-card" id="test">
             <h4>Relatívna orientácia:</h4>
             <div id="relativeOrientation">Nedostupné</div>
         </div>

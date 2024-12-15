@@ -1,228 +1,206 @@
-export default () => ({
-    recording: false,
-    activity: 'lie',
-    startTime: 0,
-    elapsedTime: 0,
-    uid: '12345', // Unique device ID
-    sensorData: {
-        acce: [],
-        gyro: [],
-        magnet: [],
-        absOri: [],
-        relOri: [],
-    },
-
-    acc: null,
-
-
-
-    AccelerometerService: {
-        accelerometer: null,
-        frequency: 10, // Hz - 10x za sekundu, každých 100 ms
-        intervalId: null,
-        isOn: false,
-        callback: null,
-
-        init: function(freq = 10) {
-            this.frequency = freq;
-            this.accelerometer = new Accelerometer({ frequency: this.frequency });
-
-            this.accelerometer.addEventListener('error', (event) => {
-                console.error('Chyba akcelerometra:', event.error.name, event.error.message);
-            });
-            return this;
+export default () => {
+    return {
+        recording: false,
+        activity: 'lie',
+        startTime: 0,
+        elapsedTime: 0,
+        uid: '12345', // Unique device ID
+        sensorData: {
+            acce: [],
+            gyro: [],
+            magnet: [],
+            absOri: [],
+            relOri: [],
         },
 
-        turnOn: function(callback) {
-            if (!this.accelerometer) {
-                console.error("Akcelerometer nie je inicializovaný. Zavolajte najskôr init().");
+        accelerometer: null,
+        gyroscope: null,
+        magnetometer: null,
+        relOrientation: null,
+        absOrientation: null,
+
+        SensorService: class {
+            constructor(type, frequency = 10) {
+                this.frequency = frequency;
+                this.sensor = new type({frequency: this.frequency});
+                this.type = type.name;
+                this.enabled = false;
+            }
+
+            quaternionToEuler = (quaternion) => {
+                const [q0, q1, q2, q3] = quaternion;
+                const ysqr = q2 * q2;
+
+                const t0 = 2.0 * (q0 * q1 + q2 * q3);
+                const t1 = 1.0 - 2.0 * (q1 * q1 + ysqr);
+                const roll = Math.atan2(t0, t1);
+
+                let t2 = 2.0 * (q0 * q2 - q3 * q1);
+                t2 = Math.max(Math.min(t2, 1.0), -1.0);
+                const pitch = Math.asin(t2);
+
+                const t3 = 2.0 * (q0 * q3 + q1 * q2);
+                const t4 = 1.0 - 2.0 * (ysqr + q3 * q3);
+                const yaw = Math.atan2(t3, t4);
+
+                const alpha = yaw * (180 / Math.PI);
+                const beta = pitch * (180 / Math.PI);
+                const gamma = roll * (180 / Math.PI);
+
+                return { alpha, beta, gamma };
+            }
+
+            streamData = async function* (){
+                if (this.enabled) {
+                    return;
+                }
+
+                this.enabled = true;
+                this.sensor.start();
+
+                try {
+                    while (this.enabled) {
+                        // console.log(this.sensor);
+
+                        const data = {
+                            t: Date.now(),
+                            x: this.sensor.x,
+                            y: this.sensor.y,
+                            z: this.sensor.z,
+                        };
+
+                        if (this.type === 'AbsoluteOrientationSensor' || this.type === 'RelativeOrientationSensor') {
+                            const q = this.sensor.quaternion;
+
+                            if (q) {
+                                const { alpha, beta, gamma } = this.quaternionToEuler(q);
+                                data.x = alpha;
+                                data.y = beta;
+                                data.z = gamma;
+                            } else {
+                                data.x = null;
+                                data.y = null;
+                                data.z = null;
+                            }
+                        }
+
+                        yield data;
+
+                        await new Promise(resolve => setTimeout(resolve, 1000 / this.frequency));
+                    }
+                } finally {
+                    this.sensor.stop();
+                }
+            };
+
+            turnOff = () => {
+                this.enabled = false;
+            };
+        },
+
+        startSensorStream(service, sensorKey, dataHandler) {
+            if (!service) {
+                console.warn(`Service pre sensor "${sensorKey}" nie je dostupný (senzor nie je podporovaný).`);
                 return;
             }
-            if (this.isOn) return; // Už beží
 
-            this.isOn = true;
-            this.callback = callback;
-            this.accelerometer.start();
 
-            const intervalMs = 1000 / this.frequency;
-            this.intervalId = setInterval(() => {
-                if (this.isOn) {
-                    const data = {
-                        x: this.accelerometer.x,
-                        y: this.accelerometer.y,
-                        z: this.accelerometer.z,
-                        timestamp: Date.now()
-                    };
-                    if (typeof this.callback === 'function') {
-                        this.callback(data);
-                    } else {
-                        console.log("Namerané dáta:", data);
-                    }
+            (async () => {
+                for await (const data of service.streamData()) {
+                    if (!this.recording) break;
+
+                    const t = Date.now() - this.startTime;
+
+                    const entry = dataHandler(t, data);
+
+                    this.sensorData[sensorKey].push(entry);
                 }
-            }, intervalMs);
+            })();
         },
 
-        turnOff: function() {
-            if (!this.isOn) return;
-            this.isOn = false;
-            this.accelerometer.stop();
-            if (this.intervalId) {
-                clearInterval(this.intervalId);
-                this.intervalId = null;
-            }
-            this.callback = null;
-        }
-    },
+        init() {
+            if ('Accelerometer' in window)
+                this.accelerometer = new this.SensorService(Accelerometer, 20);
+            if ('Gyroscope' in window)
+                this.gyroscope = new this.SensorService(Gyroscope, 20);
+            if ('Magnetometer' in window)
+                this.magnetometer = new this.SensorService(Magnetometer, 20);
+            if ('RelativeOrientationSensor' in window)
+                this.relOrientation = new this.SensorService(RelativeOrientationSensor, 20);
+            if ('AbsoluteOrientationSensor' in window)
+                this.absOrientation = new this.SensorService(AbsoluteOrientationSensor, 20);
 
-    init() {
-        console.log("Komponent inicializovaný");
-        // this.AccelerometerService.init(10); // Pripravíme akcelerometer
-        this.acc = this.AccelerometerService.init(10);
-
-        window.addEventListener("deviceorientation", handleOrientation, true);
-    },
-
-
-    startAccelerometer() {
-        this.recording = true;
-        this.startTime = Date.now();
-        this.sensorData = { acce: [], gyro: [], magnet: [], absOri: [], relOri: [] };
-
-        // Spustíme akcelerometer a každých 100 ms ukladáme dáta
-        this.acc.turnOn((data) => {
-            const t = Date.now() - this.startTime;
-            console.log(data);
-            this.sensorData.acce.push({ t, x: data.x, y: data.y, z: data.z });
-            // Tu môžete dáta posielať na server, alebo zobraziť v UI
-            document.getElementById('accelerometer').textContent = `x: ${data.x.toFixed(2)}, y: ${data.y.toFixed(2)}, z: ${data.z.toFixed(2)}`;
-        });
-    },
-
-    stopAccelerometer() {
-        this.recording = false;
-        this.acc.turnOff();
-        console.log("Meranie bolo zastavené.");
-
-        // Teraz môžeme dáta odoslať na server
-        this.sendDataToServer();
-    },
-
-
-
-
-
-
-
-
-
-
-    startRecording() {
-        this.recording = true;
-        this.startTime = Date.now();
-        this.sensorData = { acce: [], gyro: [], magnet: [], absOri: [], relOri: [] };
-        console.log(`Meranie spustené pre aktivitu: ${this.activity}`);
-        this.startSensorListeners();
-    },
-
-    stopRecording() {
-        this.recording = false;
-        console.log('Meranie zastavené.');
-        this.sendDataToServer();
-    },
-
-    startSensorListeners() {
-        if (window.DeviceMotionEvent) {
-            window.addEventListener('devicemotion', (event) => {
-                console.log('ahoj');
-                if (!this.recording) return;
-                const t = Date.now() - this.startTime;
-                const aX = event.accelerationIncludingGravity.x * 10;
-                const aY = event.accelerationIncludingGravity.y * 10;
-                const aZ = event.accelerationIncludingGravity.z * 10;
-                this.sensorData.acce.push({ t, x: aX, y: aY, z: aZ });
-                document.getElementById('accelerometer').textContent = `x: ${aX.toFixed(2)}, y: ${aY.toFixed(2)}, z: ${aZ.toFixed(2)}`;
+            window.addEventListener('sensorDataSaved', (event) => {
+                console.log(event);
+                alert(event.detail.message); // Zobraz správu používateľovi
             });
-        } else {
-            document.getElementById('accelerometer').textContent = "DeviceMotionEvent nie je podporovaný.";
+        },
+
+
+        start() {
+            this.recording = true;
+            this.startTime = Date.now();
+            this.sensorData = {acce: [], gyro: [], magnet: [], absOri: [], relOri: []};
+
+            // Akcelerometer
+            this.startSensorStream(
+                this.accelerometer,
+                'acce',
+                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
+            );
+
+            // Gyroskop
+            this.startSensorStream(
+                this.gyroscope,
+                'gyro',
+                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
+            );
+
+            // Magnetometer
+            this.startSensorStream(
+                this.magnetometer,
+                'magnet',
+                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
+            );
+
+            // Absolútna orientácia
+            this.startSensorStream(
+                this.absOrientation,
+                'absOri',
+                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
+            );
+
+            // Relatívna orientácia
+            this.startSensorStream(
+                this.relOrientation,
+                'relOri',
+                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
+            );
+        },
+
+        stop() {
+            this.recording = false;
+
+            const sensors = [this.accelerometer, this.gyroscope, this.magnetometer, this.absOrientation, this.relOrientation];
+
+            sensors.filter(service => service && typeof service.turnOff === 'function')
+                .forEach(service => service.turnOff());
+
+            console.log("Meranie bolo zastavené.");
+
+            this.sendDataToServer();
+        },
+
+
+        sendDataToServer() {
+            const dataToSend = {
+                activity: this.activity,
+                elapsedTime: Date.now() - this.startTime,
+                uid: this.uid,
+                sensorData: this.sensorData,
+            };
+
+            Livewire.dispatch('saveSensorData', {data: dataToSend});
         }
-
-        if ('Gyroscope' in window) {
-            try {
-                const gyroscope = new Gyroscope({ frequency: 60 });
-                gyroscope.addEventListener('reading', () => {
-                    if (!this.recording) return;
-                    const t = Date.now() - this.startTime;
-                    this.sensorData.gyro.push({ t, x: gyroscope.x, y: gyroscope.y, z: gyroscope.z });
-                    document.getElementById('gyroscope').textContent = `x: ${gyroscope.x.toFixed(2)}, y: ${gyroscope.y.toFixed(2)}, z: ${gyroscope.z.toFixed(2)}`;
-                });
-                gyroscope.start();
-            } catch (error) {
-                document.getElementById('gyroscope').textContent = 'Chyba: ' + error;
-            }
-        } else {
-            document.getElementById('gyroscope').textContent = 'Gyroskop nie je podporovaný.';
-        }
-
-        if ('Magnetometer' in window) {
-            try {
-                let magnetometer = new Magnetometer({ frequency: 60 });
-                magnetometer.addEventListener('reading', () => {
-                    if (!this.recording) return;
-                    const t = Date.now() - this.startTime;
-                    this.sensorData.magnet.push({ t, x: magnetometer.x, y: magnetometer.y, z: magnetometer.z });
-                    document.getElementById('magnetometer').textContent = `x: ${magnetometer.x.toFixed(2)}, y: ${magnetometer.y.toFixed(2)}, z: ${magnetometer.z.toFixed(2)}`;
-                });
-                magnetometer.start();
-            } catch (error) {
-                document.getElementById('magnetometer').textContent = 'Chyba: ' + error;
-            }
-        } else {
-            document.getElementById('magnetometer').textContent = 'Magnetometer nie je podporovaný.';
-        }
-
-        if ('AbsoluteOrientationSensor' in window) {
-            try {
-                let absoluteOrientation = new AbsoluteOrientationSensor({ frequency: 60 });
-                absoluteOrientation.addEventListener('reading', () => {
-                    if (!this.recording) return;
-                    const t = Date.now() - this.startTime;
-                    this.sensorData.absOri.push({ t, quaternion: absoluteOrientation.quaternion.map(q => q.toFixed(2)) });
-                    document.getElementById('absoluteOrientation').textContent = `Quaternion: [${absoluteOrientation.quaternion.map(q => q.toFixed(2)).join(', ')}]`;
-                });
-                absoluteOrientation.start();
-            } catch (error) {
-                document.getElementById('absoluteOrientation').textContent = 'Chyba: ' + error;
-            }
-        } else {
-            document.getElementById('absoluteOrientation').textContent = 'Absolútna orientácia nie je podporovaná.';
-        }
-
-        if ('RelativeOrientationSensor' in window) {
-            try {
-                let relativeOrientation = new RelativeOrientationSensor({ frequency: 60 });
-                relativeOrientation.addEventListener('reading', () => {
-                    if (!this.recording) return;
-                    const t = Date.now() - this.startTime;
-                    this.sensorData.relOri.push({ t, quaternion: relativeOrientation.quaternion.map(q => q.toFixed(2)) });
-                    document.getElementById('relativeOrientation').textContent = `Quaternion: [${relativeOrientation.quaternion.map(q => q.toFixed(2)).join(', ')}]`;
-                });
-                relativeOrientation.start();
-            } catch (error) {
-                document.getElementById('relativeOrientation').textContent = 'Chyba: ' + error;
-            }
-        } else {
-            document.getElementById('relativeOrientation').textContent = 'Relatívna orientácia nie je podporovaná.';
-        }
-    },
-
-    sendDataToServer() {
-        const dataToSend = {
-            activity: this.activity,
-            elapsedTime: Date.now() - this.startTime,
-            uid: this.uid,
-            sensorData: this.sensorData,
-        };
-
-        Livewire.dispatch('saveSensorData', {data: dataToSend});
-    }
-});
+    };
+};
