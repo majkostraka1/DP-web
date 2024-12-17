@@ -1,16 +1,17 @@
 export default () => {
     return {
         recording: false,
+        countdown: 0,
+        timer: null,
         activity: 'lie',
         startTime: 0,
-        elapsedTime: 0,
         uid: '12345', // Unique device ID
         sensorData: {
-            acce: [],
-            gyro: [],
-            magnet: [],
-            absOri: [],
-            relOri: [],
+            accelerometer: [],
+            gyroscope: [],
+            magnetometer: [],
+            absOrientation: [],
+            relOrientation: [],
         },
 
         accelerometer: null,
@@ -60,8 +61,6 @@ export default () => {
 
                 try {
                     while (this.enabled) {
-                        // console.log(this.sensor);
-
                         const data = {
                             t: Date.now(),
                             x: this.sensor.x,
@@ -100,7 +99,7 @@ export default () => {
 
         startSensorStream(service, sensorKey, dataHandler) {
             if (!service) {
-                console.warn(`Service pre sensor "${sensorKey}" nie je dostupný (senzor nie je podporovaný).`);
+                console.warn(`Service pre sensor "${sensorKey}" nie je dostupný.`);
                 return;
             }
 
@@ -119,20 +118,24 @@ export default () => {
         },
 
         init() {
-            if ('Accelerometer' in window)
-                this.accelerometer = new this.SensorService(Accelerometer, 20);
-            if ('Gyroscope' in window)
-                this.gyroscope = new this.SensorService(Gyroscope, 20);
-            if ('Magnetometer' in window)
-                this.magnetometer = new this.SensorService(Magnetometer, 20);
-            if ('RelativeOrientationSensor' in window)
-                this.relOrientation = new this.SensorService(RelativeOrientationSensor, 20);
-            if ('AbsoluteOrientationSensor' in window)
-                this.absOrientation = new this.SensorService(AbsoluteOrientationSensor, 20);
+            const sensors = [
+                { class: 'Accelerometer', id: 'accelerometer' },
+                { class: 'Gyroscope', id: 'gyroscope' },
+                { class: 'Magnetometer', id: 'magnetometer' },
+                { class: 'RelativeOrientationSensor', id: 'relOrientation' },
+                { class: 'AbsoluteOrientationSensor', id: 'absOrientation' },
+            ];
 
-            window.addEventListener('sensorDataSaved', (event) => {
-                console.log(event);
-                alert(event.detail.message); // Zobraz správu používateľovi
+            sensors.forEach(({ class: sensorClass, id }) => {
+                const element = document.getElementById(id);
+
+                if (sensorClass in window) {
+                    const SensorClass = window[sensorClass];
+                    this[id] = new this.SensorService(SensorClass, 20);
+                    element.classList.add('bg-success');
+                } else {
+                    element.classList.add('bg-danger');
+                }
             });
         },
 
@@ -140,53 +143,33 @@ export default () => {
         start() {
             this.recording = true;
             this.startTime = Date.now();
-            this.sensorData = {acce: [], gyro: [], magnet: [], absOri: [], relOri: []};
+            this.sensorData = {accelerometer: [], gyroscope: [], magnetometer: [], absOrientation: [], relOrientation: []};
 
-            // Akcelerometer
-            this.startSensorStream(
-                this.accelerometer,
-                'acce',
-                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
-            );
+            const sensors = [
+                { service: this.accelerometer, key: 'accelerometer' },
+                { service: this.gyroscope, key: 'gyroscope' },
+                { service: this.magnetometer, key: 'magnetometer' },
+                { service: this.absOrientation, key: 'absOrientation' },
+                { service: this.relOrientation, key: 'relOrientation' },
+            ];
 
-            // Gyroskop
-            this.startSensorStream(
-                this.gyroscope,
-                'gyro',
-                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
-            );
-
-            // Magnetometer
-            this.startSensorStream(
-                this.magnetometer,
-                'magnet',
-                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
-            );
-
-            // Absolútna orientácia
-            this.startSensorStream(
-                this.absOrientation,
-                'absOri',
-                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
-            );
-
-            // Relatívna orientácia
-            this.startSensorStream(
-                this.relOrientation,
-                'relOri',
-                (t, data) => ({t: t, x: data.x, y: data.y, z: data.z})
-            );
+            sensors.forEach(({ service, key }) => {
+                if (service) {
+                    this.startSensorStream(
+                        service,
+                        key,
+                        (t, data) => ({ t: t, x: data.x, y: data.y, z: data.z })
+                    );
+                }
+            });
         },
 
         stop() {
             this.recording = false;
-
             const sensors = [this.accelerometer, this.gyroscope, this.magnetometer, this.absOrientation, this.relOrientation];
 
             sensors.filter(service => service && typeof service.turnOff === 'function')
-                .forEach(service => service.turnOff());
-
-            console.log("Meranie bolo zastavené.");
+                .forEach(service => service?.turnOff());
 
             this.sendDataToServer();
         },
@@ -195,7 +178,7 @@ export default () => {
         sendDataToServer() {
             const dataToSend = {
                 activity: this.activity,
-                elapsedTime: Date.now() - this.startTime,
+                elapsedTime: this.startTime,
                 uid: this.uid,
                 sensorData: this.sensorData,
             };

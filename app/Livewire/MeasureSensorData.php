@@ -9,6 +9,8 @@ class MeasureSensorData extends Component
 {
     protected $listeners = ['saveSensorData'];
 
+    public array $options = ['walk', 'car', 'train', 'tram', 'lie', 'sit', 'stand', 'bus', 'ontable', 'stairsUp', 'stairsDown', 'metro', 'run', 'other'];
+
     public function mount()
     {
         //
@@ -16,6 +18,7 @@ class MeasureSensorData extends Component
 
     public function saveSensorData($data)
     {
+        dd($data);
         $date = now()->format('Y-m-d_H-i-s');
         $fileName = "sensor_data_{$date}.json";
 
