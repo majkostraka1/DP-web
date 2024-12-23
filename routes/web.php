@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/lang/{locale}', function ($locale) {
+    $allowed = ['cz', 'sk', 'en'];
+
+    if (! in_array($locale, $allowed)) {
+        $locale = 'en';
+    }
+
+    App::setLocale($locale);
+    session(['locale' => $locale]);
+
+    return redirect()->back();
+})->name('lang.switch');
+
+
+
 Route::get('/', function () {
     return view('home');
 });
+

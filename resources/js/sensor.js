@@ -3,9 +3,9 @@ export default () => {
         recording: false,
         countdown: 0,
         timer: null,
-        activity: 'lie',
+        activity: 'walk',
+        selectedActivity: '',
         startTime: 0,
-        uid: '12345', // Unique device ID
         sensorData: {
             accelerometer: [],
             gyroscope: [],
@@ -141,8 +141,8 @@ export default () => {
 
 
         start() {
-            this.recording = true;
-            this.startTime = Date.now();
+            this.selectedActivity = this.activity;
+            this.countdown = 10;
             this.sensorData = {accelerometer: [], gyroscope: [], magnetometer: [], absOrientation: [], relOrientation: []};
 
             const sensors = [
@@ -153,23 +153,36 @@ export default () => {
                 { service: this.relOrientation, key: 'relOrientation' },
             ];
 
-            sensors.forEach(({ service, key }) => {
-                if (service) {
-                    this.startSensorStream(
-                        service,
-                        key,
-                        (t, data) => ({ t: t, x: data.x, y: data.y, z: data.z })
-                    );
+
+            this.timer = setInterval(() => {
+                this.countdown -= 1;
+
+                if (this.countdown === 0) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                    this.recording = true;
+                    this.startTime = Date.now();
+
+                    sensors.forEach(({ service, key }) => {
+                        if (service) {
+                            this.startSensorStream(
+                                service,
+                                key,
+                                (t, data) => ({ t: t, x: data.x, y: data.y, z: data.z })
+                            );
+                        }
+                    });
                 }
-            });
+            }, 1000);
+
+
+
         },
 
         stop() {
             this.recording = false;
             const sensors = [this.accelerometer, this.gyroscope, this.magnetometer, this.absOrientation, this.relOrientation];
-
-            sensors.filter(service => service && typeof service.turnOff === 'function')
-                .forEach(service => service?.turnOff());
+            sensors.forEach(service => service?.turnOff());
 
             this.sendDataToServer();
         },
@@ -177,9 +190,9 @@ export default () => {
 
         sendDataToServer() {
             const dataToSend = {
-                activity: this.activity,
+                activity: this.selectedActivity,
+                uid: '',
                 elapsedTime: this.startTime,
-                uid: this.uid,
                 sensorData: this.sensorData,
             };
 

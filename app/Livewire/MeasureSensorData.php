@@ -11,14 +11,13 @@ class MeasureSensorData extends Component
 
     public array $options = ['walk', 'car', 'train', 'tram', 'lie', 'sit', 'stand', 'bus', 'ontable', 'stairsUp', 'stairsDown', 'metro', 'run', 'other'];
 
-    public function mount()
-    {
-        //
-    }
+    public string $identifier;
 
+    public string $option;
     public function saveSensorData($data)
     {
-        dd($data);
+        $data['uid'] = $this->identifier ?? '';
+
         $date = now()->format('Y-m-d_H-i-s');
         $fileName = "sensor_data_{$date}.json";
 
