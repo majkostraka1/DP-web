@@ -21,7 +21,20 @@ class MeasureSensorData extends Component
         $date = now()->format('Y-m-d_H-i-s');
         $fileName = "sensor_data_{$date}.json";
 
-        Storage::disk('local')->put("sensor_data/{$fileName}", json_encode($data, JSON_PRETTY_PRINT));
+        try {
+            Storage::disk('local')->put("sensor_data/{$fileName}", json_encode($data, JSON_PRETTY_PRINT));
+        } catch (\Exception $exception) {
+            $errorMessage = [
+                'timestamp' => now()->toDateTimeString(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ];
+
+            Storage::disk('local')->put("public/error_{$date}.log", json_encode($errorMessage, JSON_PRETTY_PRINT));
+        }
+
     }
 
     public function render()

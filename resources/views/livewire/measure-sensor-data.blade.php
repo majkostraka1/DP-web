@@ -2,6 +2,14 @@
     <div class="container mt-5" x-data="sensor" x-ref="sensors">
         <h1 class="text-center mb-4">@lang('locale.title')</h1>
 
+        <div wire:loading>
+            <div class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex justify-content-center align-items-center" style="z-index: 1050;">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
         <div class="text-center mb-4">
             <div class="row mb-3 align-items-center">
                 <label for="activitySelector" class="col-3 text-start text-md-end">@lang('locale.select-activity')</label>
@@ -44,7 +52,7 @@
         </div>
 
         <!-- start:sensors status block -->
-        <div class="row">
+        <div class="row" wire:ignore>
             <!-- Akcelerometer -->
             <div class="col-12 col-md-6 mb-4">
                 <div class="card shadow-sm" id="accelerometer">
