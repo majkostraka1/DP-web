@@ -9,7 +9,7 @@ class MeasureSensorData extends Component
 {
     protected $listeners = ['saveSensorData'];
 
-    public array $options = ['walk', 'car', 'train', 'tram', 'lie', 'sit', 'stand', 'bus', 'ontable', 'stairsUp', 'stairsDown', 'metro', 'run', 'other'];
+    public array $options = ['walk', 'car', 'train', 'tram', 'lie', 'sit', 'stand', 'bus', 'ontable', 'stairsUp', 'stairsDown', 'metro', 'run', 'other', 'jumping', 'spinning'];
 
     public string $identifier;
 
@@ -22,7 +22,11 @@ class MeasureSensorData extends Component
         $fileName = "sensor_data_{$date}.json";
 
         try {
-            Storage::disk('local')->put("sensor_data/{$fileName}", json_encode($data, JSON_PRETTY_PRINT));
+            if (in_array($data['activity'], ['jumping', 'spinning'])) {
+                Storage::disk('local')->put("sensor_data_extra/{$fileName}", json_encode($data, JSON_PRETTY_PRINT));
+            } else {
+                Storage::disk('local')->put("sensor_data/{$fileName}", json_encode($data, JSON_PRETTY_PRINT));
+            }
         } catch (\Exception $exception) {
             $errorMessage = [
                 'timestamp' => now()->toDateTimeString(),

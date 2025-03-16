@@ -18,6 +18,8 @@ return [
         'metro' => 'jazda metrom',
         'run' => 'Bežanie',
         'other' => 'Ostatné',
+        'jumping' => 'Skákanie (na mieste)',
+        'spinning' => 'Otáčanie (na mieste)',
     ],
 
     'identifier' => 'Identifikátor:',
@@ -32,6 +34,9 @@ return [
     'relative-orientation' => 'Relatívna orientácia',
     'absolute-orientation' => 'Absolútna orientácia',
     'not-available' => ' NaN ',
+
+    'activity-prediction-label' => 'Predikcia aktivity',
+    'activity-predition' => 'Predikovaná aktivita',
 
     'readme' => [
         'header' => 'Návod na použitie',

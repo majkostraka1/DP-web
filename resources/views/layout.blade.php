@@ -16,29 +16,61 @@
     <body>
 
     <header class="navbar navbar-expand">
-        <nav class="navbar-collapse navbar-nav justify-content-end" id="navbarNavDropdown">
-            <a
-                    class="nav-link dropdown-toggle"
-                    href="#"
-                    id="navbarDropdownMenuLink"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-            >
-                {{ app()->getLocale() }}
-            </a>
+        <div class="container-fluid">
+            <nav class="navbar-collapse navbar-nav justify-content-between">
+                <button id="openMenu" class="btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
 
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                <li><a class="dropdown-item" href="{{ route('lang.switch', 'cz') }}">cz</a></li>
-                <li><a class="dropdown-item" href="{{ route('lang.switch', 'sk') }}">sk</a></li>
-                <li><a class="dropdown-item" href="{{ route('lang.switch', 'en') }}">en</a></li>
-            </ul>
-        </nav>
+                <div class="d-flex align-items-center">
+                    <a
+                            class="nav-link dropdown-toggle"
+                            href="#"
+                            id="navbarDropdownMenuLink"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                    >
+                        {{ app()->getLocale() }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                        <li><a class="dropdown-item" href="{{ route('lang.switch', 'cz') }}">cz</a></li>
+                        <li><a class="dropdown-item" href="{{ route('lang.switch', 'sk') }}">sk</a></li>
+                        <li><a class="dropdown-item" href="{{ route('lang.switch', 'en') }}">en</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+
+            <div id="menu" class="overlay">
+                <button id="closeMenu" class="close-btn">×</button>
+                <ul class="overlay-links">
+                    <li><a href="{{ route('home') }}">Meranie dát</a></li>
+                    <li><a href="{{ route('lstm') }}">LSTM predikcia</a></li>
+                    <li><a href="{{ route('gru') }}">GRU predikcia</a></li>
+                </ul>
+            </div>
+        </div>
     </header>
 
 
 
-@yield('content')
+
+    @yield('content')
+
+        <script>
+            const openMenuBtn = document.getElementById('openMenu');
+            const closeMenuBtn = document.getElementById('closeMenu');
+            const menu = document.getElementById('menu');
+
+            openMenuBtn.addEventListener('click', () => {
+                menu.classList.add('show');
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                menu.classList.remove('show');
+            });
+        </script>
 
         @stack('scripts')
 

@@ -18,6 +18,8 @@ return [
         'metro' => 'Riding the subway',
         'run' => 'Running',
         'other' => 'Other',
+        'jumping' => 'Jumping (in place)',
+        'spinning' => 'Rotation (in place)',
     ],
 
     'identifier' => 'Identifier:',
@@ -32,6 +34,9 @@ return [
     'relative-orientation' => 'Relative orientation',
     'absolute-orientation' => 'Absolute orientation',
     'not-available' => ' NaN ',
+
+    'activity-prediction-label' => 'Activity prediction',
+    'activity-predition' => 'Predicted activity',
 
     'readme' => [
         'header' => 'User Guide',

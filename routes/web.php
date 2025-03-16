@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RouteController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
@@ -14,22 +15,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/lang/{locale}', function ($locale) {
-    $allowed = ['cz', 'sk', 'en'];
+Route::get('/lang/{locale}', [RouteController::class, 'switchLang'])->name('lang.switch');
 
-    if (! in_array($locale, $allowed)) {
-        $locale = 'en';
-    }
+Route::get('/', [RouteController::class, 'home'])->name('home');
 
-    App::setLocale($locale);
-    session(['locale' => $locale]);
+Route::get('/lstm', [RouteController::class, 'lstm'])->name('lstm');
 
-    return redirect()->back();
-})->name('lang.switch');
-
-
-
-Route::get('/', function () {
-    return view('home');
-});
-
+Route::get('/gru', [RouteController::class, 'gru'])->name('gru');
