@@ -142,7 +142,7 @@ export default () => {
 
         start() {
             this.selectedActivity = this.activity;
-            this.countdown = 10;
+            this.countdown = 5;
             this.sensorData = {accelerometer: [], gyroscope: [], magnetometer: [], absOrientation: [], relOrientation: []};
 
             const sensors = [
