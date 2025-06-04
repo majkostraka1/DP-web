@@ -25,13 +25,8 @@ class RouteController extends Controller
         return view('home');
     }
 
-    public function lstm()
+    public function prediction()
     {
-        return view('lstm');
-    }
-
-    public function gru()
-    {
-        return view('gru');
+        return view('prediction');
     }
 }

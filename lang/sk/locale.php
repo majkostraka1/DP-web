@@ -4,6 +4,7 @@ return [
     'title' => 'Detekcia Senzorov',
     'select-activity' => 'Vyberte aktivitu:',
     'activities' => [
+        '-' => '-',
         'walk' => 'Kráčanie',
         'car' => 'Jazda autom',
         'train' => 'Jazda vlakom',
@@ -50,4 +51,12 @@ return [
         'p8' => 'Meranie ukončíte stlačením tlačidla <strong>Zastav meranie</strong>.',
     ],
 
+
+    'classification-detail' => [
+        'label' => 'Detailné výsledky klasifikátorov',
+        'raw-model' => 'RAW model (váha 0.2): ',
+        'lstm-model' => 'LSTM model (váha 0.4): ',
+        'gru-model' => 'GRU model (váha 0.4): ',
+        'ensembled-prob' => 'Celková váhová pravdepodobnosť:'
+    ],
 ];

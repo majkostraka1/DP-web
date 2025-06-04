@@ -46,8 +46,11 @@
                 <button id="closeMenu" class="close-btn">×</button>
                 <ul class="overlay-links">
                     <li><a href="{{ route('home') }}">Meranie dát</a></li>
-                    <li><a href="{{ route('lstm') }}">LSTM predikcia</a></li>
-                    <li><a href="{{ route('gru') }}">GRU predikcia</a></li>
+                    <li><a href="{{ route('prediction') }}">Predikcia aktivity</a></li>
+
+
+{{--                    <li><a href="{{ route('lstm') }}">LSTM predikcia</a></li>--}}
+{{--                    <li><a href="{{ route('gru') }}">GRU predikcia</a></li>--}}
                 </ul>
             </div>
         </div>

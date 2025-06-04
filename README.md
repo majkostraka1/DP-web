@@ -1,66 +1,61 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Obsah nahratého pamäťového média
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Obsah celého pamäťového média tejto práce je nahratý v cloudovom úložisku:  
+[https://nextcloud.fit.vutbr.cz/s/Nf5tzby5CoYko25](https://nextcloud.fit.vutbr.cz/s/Nf5tzby5CoYko25)  
+Tu je možné stiahnuť komprimovaný súbor, kde sa nachádzajú všetky zkompilovateľné súbory potrebné pre chod webovej aplikácie (zložka `website/`), implementovaného API rozhrania (zložka `api`), ako aj skompilovaný Python notebook obsahujúci kroky tvorby dátovej sady a vytváranie jednotlivých modelov (súbor `features_and_models.ipynb`).  
+Zložka `doc/` obsahuje súbor práce a LaTeX zdrojový kód tejto práce.
 
-## About Laravel
+V pamäťovom médiu sú obsiahnuté aj dáta namerané cez webovú aplikáciu v zložke `data/my_data/` a okrem toho aj vygenerované dáta v zložke `data/generated_data/`.  
+Taktiež je tu databáza extrahovaných príznakov z nameraných dát (súbor `features_db.sql`) a exportované modely a škálovače (zložka `models_and_scalers`).  
+Ako posledný je súbor `README.md`, ktorý obsahuje okrem popisu aj návod na inštaláciu potrebných knižníc.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Podrobný strom nahratého pamäťového média:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- .
+- ├── api/ # Súbory API rozhrania
+- ├── data/ # Súbory senzorových meraní
+- │ ├── generated_data/ # Generované dáta
+- │ └── my_data/ # Dáta namerané aplikáciou
+- ├── doc/ # Súbory s dokumentmi k diplomovej práci
+- │ ├── latex/ # LaTeX zdrojový kód tejto diplomovej práce
+- │ └── thesis.pdf # Práca vo formáte PDF súboru
+- ├── models_and_scalers/ # Exportované modely a škálovače
+- ├── website/ # Webová stránka
+- ├── features_and_models.ipynb # Extrakcia príznakov a tréning modelov
+- ├── features_db.sql # Databáza príznakov
+- ├── README.md # README súbor s popisom obsahu jednotlivých súborov
+- └── requirements.txt # Súbor potrebných Python knižníc
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+# Inštalačný manuál
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Pre inštaláciu všetkých potrebných balíkov pre súbor `features_and_models.ipynb` a rozbehnutie API rozhrania stačí nainštalovať balíky obsiahnuté v súbore `requirements.txt` nasledovne:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+pip install -r requirements.txt
+```
 
-## Laravel Sponsors
+Pri implementácia a testovanie týchto súbor bol vyvíjaný v interpreteri  `Python 3.11` Pri používaní notebookú je odporúčané využiť nejaké interaktívne vývojové prostredie (v práci využívaný jupyter (Skupina sotvérových produktov pre  jazyk Python (https://jupyter.org/)). Zapnutie API rozhrania je automatizované kedy na serveri kde beží webová aplikácia stačí zapnúť skript `api/manage_api.sh start` ktorý následne spustí implementované API rozhranie.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Pre rozbehnutie webovej aplikácie je potrebné mať na serveri nainštalovanú verziu jazyka `php` 8.2 a vyššiu (v práci využívaná verzia `8.4.1`), balíček `Composer` verzie `2.8` a vyššej (v práci využívaná verzia `2.8.4`) a rámcový balíček `Node.js` verzie 18 a vyššej (využívaná verzia `18.19.1`). Pre inštaláciu potrebných balíkov cez `Composer` je potrebné v zložke kde sa nachádza webová stránka spustiť príkaz:
 
-### Premium Partners
+```bash
+composer install
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Následne je potrebné nainštalovať všetky potrebné `javascript` balíčky a ich následnú kompiláciu sériou príkazov:
 
-## Contributing
+```bash
+npm install
+npm run build
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Ak všetko zbehlo správne tak aplikáciu je možné pustiť príkazom:
 
-## Code of Conduct
+```bash
+php artisan serve
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Pre správne fungovanie tejto webovej aplikácie je potrebné mať spustené aplikačné rozhranie cez spomínaný skript na tom istom serveri (resp. zariadení), na ktorom je spustená webová aplikácia. Pre správne fungovanie Generic Sensor API je taktiež potrebné mať správne nastavenie SSH certifikátu v konfigurácií webového servera.

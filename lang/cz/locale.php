@@ -4,6 +4,7 @@ return [
     'title' => 'Detekce senzorů',
     'select-activity' => 'Vyberte aktivitu:',
     'activities' => [
+        '-' => '-',
         'walk' => 'Chůze',
         'car' => 'Jízda autem',
         'train' => 'Jízda vlakem',
@@ -48,5 +49,14 @@ return [
         'p6' => 'Po stisku tlačítka <strong>Spustit měření</strong> se spustí 10sekundové odpočítávání. Během této doby vložte zařízení do kapsy u kalhot a ujistěte se, že je odemčené.',
         'p7' => 'Po uplynutí odpočtu začne měření s frekvencí 50 Hz.',
         'p8' => 'Měření ukončíte stisknutím tlačítka <strong>Zastavit měření</strong>.',
+    ],
+
+
+    'classification-detail' => [
+        'label' => 'Detailní výsledky klasifikátorů',
+        'raw-model' => 'RAW model (váha 0.2): ',
+        'lstm-model' => 'LSTM model (váha 0.4): ',
+        'gru-model' => 'GRU model (váha 0.4): ',
+        'ensembled-prob' => 'Celková váhová pravděpodobnost:'
     ],
 ];

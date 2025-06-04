@@ -19,6 +19,4 @@ Route::get('/lang/{locale}', [RouteController::class, 'switchLang'])->name('lang
 
 Route::get('/', [RouteController::class, 'home'])->name('home');
 
-Route::get('/lstm', [RouteController::class, 'lstm'])->name('lstm');
-
-Route::get('/gru', [RouteController::class, 'gru'])->name('gru');
+Route::get('/prediction', [RouteController::class, 'prediction'])->name('prediction');

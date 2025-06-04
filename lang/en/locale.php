@@ -4,6 +4,7 @@ return [
     'title' => 'Sensor Detection',
     'select-activity' => 'Select an activity:',
     'activities' => [
+        '-' => '-',
         'walk' => 'Walking',
         'car' => 'Driving a car',
         'train' => 'Riding a train',
@@ -48,5 +49,13 @@ return [
         'p6' => 'After clicking <strong>Start measuring</strong>, a 10-second countdown will begin. During this time, place the device in your pants pocket and ensure it remains unlocked.',
         'p7' => 'Once the countdown ends, measurements will begin at a frequency of 50 Hz.',
         'p8' => 'Stop the measurement by pressing <strong>Stop measuring</strong>.',
+    ],
+
+    'classification-detail' => [
+        'label' => 'Detailed classifier results',
+        'raw-model' => 'RAW model (weight 0.2): ',
+        'lstm-model' => 'LSTM model (weight 0.4): ',
+        'gru-model' => 'GRU model (weight 0.4): ',
+        'ensembled-prob' => 'Total weighted probability:'
     ],
 ];

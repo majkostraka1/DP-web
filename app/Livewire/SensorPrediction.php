@@ -5,11 +5,13 @@ namespace App\Livewire;
 use Illuminate\Support\Facades\Http;
 use Livewire\Component;
 
-class GruPrediction extends Component
+class SensorPrediction extends Component
 {
     public $predictionResult = '';
 
     public string $_uid;
+
+    public string $prediction = "-";
 
     protected $listeners = ['sendSensorData', 'clearData'];
 
@@ -21,10 +23,12 @@ class GruPrediction extends Component
     {
         $data['uid'] = $this->_uid;
 
-        $response = Http::post('http://127.0.0.1:5050/gru-predict', $data);
+        $response = Http::post('http://127.0.0.1:5050/third-predict', $data);
 
         if ($response->successful()) {
             $result = $response->json();
+
+            $this->prediction = $result['predicted_class'];
 
             $this->dispatch('prediction-updated', $result);
         } else {
@@ -37,10 +41,13 @@ class GruPrediction extends Component
     public function clearData()
     {
         $response = Http::post('http://127.0.0.1:5050/clear-data', ['uid' => $this->_uid]);
+
+        $this->prediction = "-";
+
     }
 
     public function render()
     {
-        return view('livewire.gru-prediction');
+        return view('livewire.sensor-prediction');
     }
 }

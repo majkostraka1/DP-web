@@ -15,6 +15,10 @@ export default () => {
         relOrientation: null,
         sendTimer: null,
         predictedClass: '-',
+        finalScore: 0,
+        raw: [],
+        lstm: [],
+        gru: [],
 
         // Trieda pre prácu so senzorom
         SensorService: class {
@@ -130,7 +134,12 @@ export default () => {
             ];
 
             Livewire.on('prediction-updated', data => {
-                this.predictedClass = data.pop().predicted_class;
+                const result = data.pop();
+                this.predictedClass = result.predicted_class;
+                this.finalScore = result.score;
+                this.raw = result.raw;
+                this.lstm = result.lstm;
+                this.gru = result.gru;
             });
 
             sensors.forEach(({ class: sensorClass, id }) => {
